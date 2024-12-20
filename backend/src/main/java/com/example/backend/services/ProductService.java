@@ -28,4 +28,12 @@ public class ProductService {
         return productRepository.update(id, product);
     }
 
+    public Product outOfStock(Long id) {
+        return productRepository.updateStock(id, 0);
+    }
+
+    public Product inStock(Long id) {
+        return productRepository.updateStock(id, 10);
+    }
+
 }

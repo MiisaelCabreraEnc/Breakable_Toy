@@ -5,6 +5,8 @@ import com.example.backend.services.ProductService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/products")
@@ -35,6 +37,16 @@ public class ProductController {
     @PutMapping("/{id}")
     public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
         return productService.updateProduct(id, product);
+    }
+
+    @PostMapping("/{id}/outofstock")
+    public Product outOfStock(@PathVariable Long id) {
+        return productService.outOfStock(id);
+    }
+
+    @PostMapping("/{id}/instock")
+    public Product inStock(@PathVariable Long id) {
+        return productService.inStock(id);
     }
 
 }
