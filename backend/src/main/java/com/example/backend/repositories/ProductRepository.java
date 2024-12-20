@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public class ProductRepository {
 
     private static Map<Long, Product> products = new HashMap<>();
@@ -38,13 +41,4 @@ public class ProductRepository {
         return null;
     }
 
-    public Product updateStock(Long id, int stock) {
-        if (products.containsKey(id)) {
-            Product product = products.get(id);
-            product.setStock(stock);
-            products.put(id, product);
-            return product;
-        }
-        return null;
-    }
 }

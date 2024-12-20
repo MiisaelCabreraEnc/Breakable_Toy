@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/products")
 public class ProductController {
 
-    ProductService productService = new ProductService();
+    private ProductService productService;
 
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
@@ -40,13 +40,13 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/outofstock")
-    public Product outOfStock(@PathVariable Long id) {
-        return productService.outOfStock(id);
+    public Product setProductOutOfStock(@PathVariable Long id) {
+        return productService.updateProductStock(id, 0);
     }
 
     @PostMapping("/{id}/instock")
-    public Product inStock(@PathVariable Long id) {
-        return productService.inStock(id);
+    public Product setProductDefaultValueinStock(@PathVariable Long id) {
+        return productService.updateProductStock(id, 10);
     }
 
 }

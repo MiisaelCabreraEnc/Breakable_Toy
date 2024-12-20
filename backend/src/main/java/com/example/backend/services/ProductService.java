@@ -5,8 +5,11 @@ import com.example.backend.repositories.ProductRepository;
 
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class ProductService {
-    private ProductRepository productRepository = new ProductRepository();
+    private ProductRepository productRepository;
 
     public Product createProduct(Product product) {
         return productRepository.save(product);
@@ -28,12 +31,15 @@ public class ProductService {
         return productRepository.update(id, product);
     }
 
-    public Product outOfStock(Long id) {
-        return productRepository.updateStock(id, 0);
-    }
+    public Product updateProductStock(Long id, int stock) {
+        Product product = productRepository.getById(id).get();
+        if (product != null) {
+            product.setStock(stock);
+            productRepository.update(id, product);
+            return product;
+        }
 
-    public Product inStock(Long id) {
-        return productRepository.updateStock(id, 10);
+        return null;
     }
 
 }
