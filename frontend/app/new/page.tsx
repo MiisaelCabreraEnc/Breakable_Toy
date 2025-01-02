@@ -109,7 +109,7 @@ export default function ProdctForm(props: any) {
       as: "button" as const,
       typeof: "button" as const,
       children: "Cancel",
-      onclick: handleCancel,
+      onClick: props.handleCancel ?? handleCancel,
       variant: "secondary" as const,
     },
   ];
@@ -118,7 +118,6 @@ export default function ProdctForm(props: any) {
     console.log(formData);
     try {
       if (formData.categoryId === "") {
-        console.log(formData.category, formData.newCategory);
         const categoryResponse = await fetch(
           "http://localhost:9090/categories",
           {
@@ -140,15 +139,20 @@ export default function ProdctForm(props: any) {
         },
         body: JSON.stringify(formData),
       });
-      router.push("/");
-      router.refresh;
+      if (props.refresh) {
+        props.refresh();
+        props.handleCancel();
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     } catch (error) {
       console.log(error);
     }
   }
 
   return (
-    <main className="flex items center flex-col p-12 m-auto">
+    <main className="flex items center flex-col m-auto">
       {!loading && (
         <FormContent
           inputs={inputs}

@@ -8,6 +8,7 @@ interface ProductsTableProps {
   products: ProductData[];
   onOrder: (orderBy: string) => void;
   onDelete: (id: number) => void;
+  onEdit: (id: number) => void;
 }
 
 const ProductsTable: FunctionComponent<ProductsTableProps> = ({
@@ -15,6 +16,7 @@ const ProductsTable: FunctionComponent<ProductsTableProps> = ({
   categories,
   onOrder,
   onDelete,
+  onEdit,
 }) => {
   return (
     <table className="border my-4">
@@ -79,6 +81,7 @@ const ProductsTable: FunctionComponent<ProductsTableProps> = ({
               key={"product_" + index}
               {...product}
               onDelete={onDelete}
+              onEdit={onEdit}
               categoryName={category ? category.name : ""}
             />
           );

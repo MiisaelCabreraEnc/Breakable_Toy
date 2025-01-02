@@ -14,6 +14,7 @@ export interface ProductsTableItemProps {
   updateDate: string;
   categoryName: string;
   onDelete: (id: number) => void;
+  onEdit: (id: number) => void;
 }
 
 const TD_STYLE =
@@ -33,6 +34,7 @@ const ProductsTableItem: FunctionComponent<ProductsTableItemProps> = ({
   expirationDate,
   stock,
   onDelete,
+  onEdit,
 }) => {
   let rowBackground = "";
   const [currentStock, setCurrentStock] = useState(stock);
@@ -91,9 +93,10 @@ const ProductsTableItem: FunctionComponent<ProductsTableItemProps> = ({
       <td className={TD_STYLE + stockBackground}>{currentStock}</td>
       <td className={TD_STYLE}>
         <span className="flex mx-auto w-full  justify-evenly font-bold">
-          <Link href={"edit/" + id}>
-            <EditIcon className="h-6 w-6 text-white " />
-          </Link>{" "}
+          <EditIcon
+            onClick={() => onEdit(id)}
+            className="h-6 w-6 text-white "
+          />
           /{" "}
           <DeleteIcon
             onClick={() => onDelete(id)}

@@ -9,7 +9,7 @@ interface ButtonProps
   extends HtmlHTMLAttributes<HTMLButtonElement>,
     CommonProps {
   as: "button";
-  onclick?: () => void;
+  onClick?: () => void;
   typeof?: "button" | "submit" | "reset";
 }
 
@@ -21,7 +21,7 @@ interface LinkProps extends HtmlHTMLAttributes<HTMLAnchorElement>, CommonProps {
 export type ButtonElementProps = ButtonProps | LinkProps;
 
 const BUTTON_STYLE =
-  "  px-4 min-w-40 flex items-center justify-center py-2 rounded-full my-2 w-fit text-white transition-color ease-out duration-300 ";
+  "  px-4 min-w-40 flex items-center justify-center py-2 rounded-full my-4 w-fit text-white transition-color ease-out duration-300 ";
 
 const VARIANTS = {
   primary: " bg-blue-500 hover:bg-blue-600 ",
@@ -41,7 +41,7 @@ const Button: FunctionComponent<ButtonElementProps> = (props) => {
   }
   return (
     <button
-      onClick={props.onclick}
+      onClick={props.onClick}
       type={props.typeof}
       className={elementStyles}
     >

@@ -40,7 +40,7 @@ const FilterContent: FunctionComponent<FormContentProps> = ({
   };
 
   return (
-    <form className="border w-full my-4 m-auto p-8" onSubmit={handleFormSubmit}>
+    <form className="border w-full m-auto p-8" onSubmit={handleFormSubmit}>
       <div className=" flex flex-col ">
         <div className=" w-2/3 m-auto">
           {inputs.map((input, index) => (

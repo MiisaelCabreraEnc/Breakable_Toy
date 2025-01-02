@@ -12,11 +12,14 @@ const PRODUCT = {
   stock: 10,
 };
 
-export default function editProductPage() {
+export default function editProductPage(props: any) {
   const params = useParams();
   const router = useRouter();
-  const { id } = params;
-  const [props, setProps] = useState({ handleSubmit }) as any;
+  const id = props.id ?? params.id;
+  const [propsToSend, setPropsToSend] = useState({
+    handleSubmit,
+    ...props,
+  }) as any;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +30,7 @@ export default function editProductPage() {
     try {
       const response = await fetch(`http://localhost:9090/products/${id}`);
       const ProductData = await response.json();
-      setProps({ ...props, ...ProductData });
+      setPropsToSend({ ...propsToSend, ...ProductData });
     } catch (error) {
       console.log(error);
     } finally {
@@ -61,12 +64,17 @@ export default function editProductPage() {
         },
         body: JSON.stringify(formData),
       });
-      router.push("/");
-      router.refresh;
+      if (props.refresh) {
+        props.refresh();
+        props.handleCancel();
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     } catch (error) {
       console.log(error);
     }
   }
 
-  return <>{!loading && <ProdctForm {...props} />}</>;
+  return <>{!loading && <ProdctForm {...propsToSend} />}</>;
 }

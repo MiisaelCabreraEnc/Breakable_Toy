@@ -30,6 +30,8 @@ const Metrics: FunctionComponent<MetricsProps> = ({ metrics }) => {
       (overall.stockValue / overall.productsInStock).toFixed(2)
     );
 
+    if (isNaN(overall.averagePrice)) overall.averagePrice = 0;
+
     setAllMetrics((prevMetrics) => {
       const index = prevMetrics.findIndex(
         (metric) => metric.category === "Overall"

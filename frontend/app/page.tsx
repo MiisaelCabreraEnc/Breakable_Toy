@@ -6,6 +6,8 @@ import Button from "../components/atoms/Button/Button";
 import ProductsTable from "../components/organisms/ProductsTable/ProductsTable";
 import Pagination from "../components/organisms/Pagination/Pagination";
 import Metrics from "../components/organisms/Metrics/Metrics";
+import ProductForm from "./new/page";
+import EditProductPage from "./edit/[id]/page";
 
 const FILTER_INPUTS = [
   {
@@ -84,11 +86,15 @@ export default function Home() {
   const queryPage = searchParams.get("page");
   const currentPage = queryPage ? parseInt(queryPage) : 1;
 
+  const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<ProductData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [filterInputs, setFilterInputs] = useState(FILTER_INPUTS);
   const [totalPages, setTotalPages] = useState(1);
   const [metrics, setMetrics] = useState<MetricData[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentModalType, setCurrentModalType] = useState("create");
+  const [productToEdit, setProductToEdit] = useState(0);
 
   async function fetchData() {
     const availability = filterAvailability ? filterAvailability : "";
@@ -97,6 +103,7 @@ export default function Home() {
     const orderedBy = filterOrderedBy ? filterOrderedBy : "";
 
     try {
+      setLoading(true);
       const productsResponse = await fetch(
         `http://localhost:9090/products?page=${
           currentPage - 1
@@ -133,6 +140,8 @@ export default function Home() {
       setFilterInputs(updatedFilterInputs);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -153,9 +162,9 @@ export default function Home() {
         (acc, product) => acc + product.price * product.stock,
         0
       );
-      const averagePrice = parseFloat(
-        (stockValue / productsInStock).toFixed(2)
-      );
+      let averagePrice = parseFloat((stockValue / productsInStock).toFixed(2));
+
+      if (isNaN(averagePrice)) averagePrice = 0;
 
       return {
         category: category.name,
@@ -195,12 +204,21 @@ export default function Home() {
 
       const result = await response.json();
 
-      console.log(result);
-
       if (result) fetchData();
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const onEdit = (id: number) => {
+    setCurrentModalType("update");
+    setProductToEdit(id);
+    setIsModalOpen(true);
+  };
+
+  const onCreate = () => {
+    setCurrentModalType("create");
+    setIsModalOpen(true);
   };
 
   useEffect(() => {
@@ -214,15 +232,46 @@ export default function Home() {
         inputs={filterInputs}
         buttons={FORM_BUTTONS}
       />
-      <Button as="link" href="/new" variant="primary" className="">
+      <Button
+        as="button"
+        typeof="button"
+        onClick={() => onCreate()}
+        variant="primary"
+      >
         New Product
       </Button>
 
-      {products.length > 0 && (
+      <div
+        className={
+          "bg-black border fixed w-1/2 inset-1/4 h-fit transition-all duration-300 ease-in-out origin-top" +
+          (isModalOpen === true ? " scale-y-100 " : " scale-y-0 ")
+        }
+      >
+        {currentModalType === "create" && (
+          <ProductForm
+            {...{
+              handleCancel: () => setIsModalOpen(false),
+              refresh: () => fetchData(),
+            }}
+          />
+        )}
+        {currentModalType === "update" && (
+          <EditProductPage
+            {...{
+              id: productToEdit,
+              handleCancel: () => setIsModalOpen(false),
+              refresh: () => fetchData(),
+            }}
+          />
+        )}
+      </div>
+
+      {products.length > 0 && !loading && (
         <>
           <ProductsTable
             onOrder={handleOrder}
             onDelete={onDelete}
+            onEdit={onEdit}
             categories={categories}
             products={products}
           />
