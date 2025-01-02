@@ -16,7 +16,6 @@ const Metrics: FunctionComponent<MetricsProps> = ({ metrics }) => {
       (acc, { productsInStock, stockValue, averagePrice }) => {
         acc.productsInStock += productsInStock;
         acc.stockValue += stockValue;
-        acc.averagePrice += averagePrice;
         return acc;
       },
       {
@@ -27,7 +26,9 @@ const Metrics: FunctionComponent<MetricsProps> = ({ metrics }) => {
       }
     );
 
-    console.log(metrics.some((metric) => metric.category !== overall.category));
+    overall.averagePrice = parseFloat(
+      (overall.stockValue / overall.productsInStock).toFixed(2)
+    );
 
     setAllMetrics((prevMetrics) => {
       const index = prevMetrics.findIndex(

@@ -10,6 +10,7 @@ interface ButtonProps
     CommonProps {
   as: "button";
   onclick?: () => void;
+  typeof?: "button" | "submit" | "reset";
 }
 
 interface LinkProps extends HtmlHTMLAttributes<HTMLAnchorElement>, CommonProps {
@@ -39,7 +40,11 @@ const Button: FunctionComponent<ButtonElementProps> = (props) => {
     );
   }
   return (
-    <button onClick={props.onclick} type="button" className={elementStyles}>
+    <button
+      onClick={props.onclick}
+      type={props.typeof}
+      className={elementStyles}
+    >
       {props.children}
     </button>
   );

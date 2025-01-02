@@ -6,12 +6,18 @@ import { ButtonElementProps } from "../../atoms/Button/Button";
 interface FormProps extends HtmlHTMLAttributes<HTMLFormElement> {
   inputs: InputProps[];
   buttons: ButtonElementProps[];
+  onSubmit: (formData: any) => void;
 }
 
-const Form: FunctionComponent<FormProps> = ({ inputs, buttons }) => {
+const Form: FunctionComponent<FormProps> = ({ inputs, buttons, onSubmit }) => {
+  const handleFormSubmit = (e: React.FormEvent, formData: any) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
   return (
     <form className="border w-full my-4 m-auto p-8" action="">
-      <FormContent inputs={inputs} buttons={buttons} />
+      <FormContent onSubmit={onSubmit} inputs={inputs} buttons={buttons} />
     </form>
   );
 };
