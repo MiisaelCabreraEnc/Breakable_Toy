@@ -1,16 +1,23 @@
+"use client";
 import Link from "next/link";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useState } from "react";
+import EditIcon from "../../atoms/Icons/EditIcon/EditIcon";
+import DeleteIcon from "../../atoms/Icons/DeleteIcon/DeleteIcon";
 
 export interface ProductsTableItemProps {
   id: number;
-  category: string;
   name: string;
   price: number;
-  expirationDate?: string;
+  expirationDate: string;
   stock: number;
+  creationDate: string;
+  updateDate: string;
+  categoryName: string;
+  onDelete: (id: number) => void;
 }
 
-const TD_STYLE = "border text-center py-4";
+const TD_STYLE =
+  "border text-center py-4 transition-all duration-300 ease-in-out";
 const TD_BACKGROUND = {
   red: " bg-red-500 ",
   orange: " bg-orange-500 ",
@@ -20,13 +27,15 @@ const TD_BACKGROUND = {
 
 const ProductsTableItem: FunctionComponent<ProductsTableItemProps> = ({
   id,
-  category,
+  categoryName,
   name,
   price,
   expirationDate,
   stock,
+  onDelete,
 }) => {
   let rowBackground = "";
+  const [currentStock, setCurrentStock] = useState(stock);
   if (expirationDate) {
     const currentDate = new Date();
     const expiresIn = new Date(expirationDate);
@@ -41,25 +50,56 @@ const ProductsTableItem: FunctionComponent<ProductsTableItemProps> = ({
         : TD_BACKGROUND["yellow"];
   }
   const stockBackground =
-    stock < 5
+    currentStock < 5
       ? TD_BACKGROUND["red"]
-      : stock <= 10
+      : currentStock <= 10
       ? TD_BACKGROUND["orange"]
       : "";
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const request = currentStock === 0 ? "instock" : "outofstock";
+      const response = await fetch(
+        `http://localhost:9090/products/${id}/${request}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const updatedProduct = await response.json();
+      setCurrentStock(updatedProduct.stock);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <tr className={rowBackground}>
       <td className={TD_STYLE}>
-        <input type="checkbox" />
+        <input
+          type="checkbox"
+          onChange={handleChange}
+          checked={currentStock === 0}
+        />
       </td>
-      <td className={TD_STYLE}>{category}</td>
+      <td className={TD_STYLE}>{categoryName}</td>
       <td className={TD_STYLE}>{name}</td>
       <td className={TD_STYLE}>{price}</td>
       <td className={TD_STYLE}>{expirationDate}</td>
-      <td className={TD_STYLE + stockBackground}>{stock}</td>
+      <td className={TD_STYLE + stockBackground}>{currentStock}</td>
       <td className={TD_STYLE}>
-        {" "}
-        <Link href={"edit/" + id}>edit</Link> / delete
+        <span className="flex mx-auto w-full  justify-evenly font-bold">
+          <Link href={"edit/" + id}>
+            <EditIcon className="h-6 w-6 text-white " />
+          </Link>{" "}
+          /{" "}
+          <DeleteIcon
+            onClick={() => onDelete(id)}
+            className="h-6 w-6 text-white cursor-pointer"
+          />
+        </span>
       </td>
     </tr>
   );

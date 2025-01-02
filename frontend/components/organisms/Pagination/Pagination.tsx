@@ -16,6 +16,8 @@ const Pagination: FunctionComponent<PaginationProps> = ({
   currentPage,
   route,
 }) => {
+  if (maxPages > totalPages) maxPages = totalPages;
+
   const elements: paginationElementProps[] = [
     {
       href: route + "1",
@@ -99,9 +101,9 @@ const Pagination: FunctionComponent<PaginationProps> = ({
     for (let i = 1; i <= maxPages; i++) {
       seedPage(i);
     }
-    seedNextTenth();
+    if (totalPages > maxPages) seedNextTenth();
   } else if (currentPage < totalPages - halfOfMaxElements) {
-    seedPreviousTenth();
+    if (totalPages > maxPages) seedPreviousTenth();
     for (
       let i = currentPage - Math.trunc(maxPages / 2);
       i < currentPage + maxPages / 2;
@@ -109,10 +111,10 @@ const Pagination: FunctionComponent<PaginationProps> = ({
     ) {
       seedPage(i);
     }
-    seedNextTenth();
+    if (totalPages > maxPages) seedNextTenth();
   } else {
-    seedPreviousTenth();
-    for (let i = totalPages - maxPages; i <= totalPages; i++) {
+    if (totalPages > maxPages) seedPreviousTenth();
+    for (let i = totalPages - maxPages + 1; i <= totalPages; i++) {
       seedPage(i);
     }
   }

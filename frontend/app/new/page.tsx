@@ -1,8 +1,10 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Form from "../../components/organisms/Form/Form";
+import { InputProps } from "@/components/atoms/Input/Input";
+import FormContent from "../../components/molecules/FormContent/FormContent";
 
-const INPUTS = [
+const INPUTS: InputProps[] = [
   {
     as: "text" as const,
     label: "Name",
@@ -11,8 +13,13 @@ const INPUTS = [
   {
     as: "select" as const,
     label: "Category",
-    name: "category",
+    name: "categoryId",
     options: [],
+  },
+  {
+    as: "text" as const,
+    label: "New category",
+    name: "newCategory",
   },
   {
     as: "text" as const,
@@ -32,14 +39,65 @@ const INPUTS = [
     name: "expirationDate",
     type: "date",
   },
-];
+] as const;
 
-export default function ProdctForm() {
+interface CategoryData {
+  id: number;
+  name: string;
+}
+
+export default function ProdctForm(props: any) {
   const router = useRouter();
+
+  const [inputs, setInputs] = useState(INPUTS);
+  const [loading, setLoading] = useState(true);
 
   const handleCancel = () => {
     router.back();
   };
+
+  async function fetchData() {
+    try {
+      const categoriesResponse = await fetch(
+        "http://localhost:9090/categories"
+      );
+      const categoriesData = await categoriesResponse.json();
+
+      const updatedInputs = inputs.map((input) => {
+        const formValue = props[input.name] ? props[input.name] : "";
+        return { ...input, formValue };
+      });
+
+      const options = [
+        {
+          children: "Create a new category",
+          value: "",
+        },
+        ...categoriesData.map((category: CategoryData) => ({
+          children: category.name,
+          value: category.id.toString(),
+        })),
+      ];
+
+      updatedInputs[1] = {
+        as: "select" as const,
+        label: "Category",
+        name: "categoryId",
+        options,
+        formValue: props.categoryId ? props.categoryId : "",
+      };
+
+      setInputs(updatedInputs);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const FORM_BUTTONS = [
     {
@@ -49,15 +107,55 @@ export default function ProdctForm() {
     },
     {
       as: "button" as const,
+      typeof: "button" as const,
       children: "Cancel",
       onclick: handleCancel,
       variant: "secondary" as const,
     },
   ];
 
+  async function handleSubmit(formData: any) {
+    console.log(formData);
+    try {
+      if (formData.categoryId === "") {
+        console.log(formData.category, formData.newCategory);
+        const categoryResponse = await fetch(
+          "http://localhost:9090/categories",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name: formData.newCategory }),
+          }
+        );
+        const newCategory = await categoryResponse.json();
+        formData.categoryId = newCategory.id;
+      }
+
+      const response = await fetch("http://localhost:9090/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      router.push("/");
+      router.refresh;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <main className="flex items center flex-col p-12 m-auto">
-      <Form inputs={INPUTS} buttons={FORM_BUTTONS} />
+      {!loading && (
+        <FormContent
+          inputs={inputs}
+          buttons={FORM_BUTTONS}
+          onSubmit={props.handleSubmit ?? handleSubmit}
+        />
+      )}
     </main>
   );
 }
