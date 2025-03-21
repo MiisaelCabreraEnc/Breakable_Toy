@@ -20,10 +20,10 @@ export interface ProductsTableItemProps {
 const TD_STYLE =
   "border text-center py-4 transition-all duration-300 ease-in-out";
 const TD_BACKGROUND = {
-  red: " bg-red-500 ",
-  orange: " bg-orange-500 ",
-  yellow: " bg-yellow-500 ",
-  green: " bg-green-500 ",
+  red: " bg-red-700 ",
+  orange: " bg-orange-700 ",
+  yellow: " bg-yellow-700 ",
+  green: " bg-green-700 ",
 };
 
 const ProductsTableItem: FunctionComponent<ProductsTableItemProps> = ({

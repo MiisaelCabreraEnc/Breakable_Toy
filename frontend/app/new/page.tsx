@@ -142,6 +142,7 @@ export default function ProdctForm(props: any) {
       if (props.refresh) {
         props.refresh();
         props.handleCancel();
+        fetchData();
       } else {
         router.push("/");
         router.refresh();

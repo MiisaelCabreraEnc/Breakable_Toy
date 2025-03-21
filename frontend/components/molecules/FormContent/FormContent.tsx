@@ -26,7 +26,7 @@ const FilterContent: FunctionComponent<FormContentProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    const newValue = isNaN(Number(value)) ? value : Number(value);
+    const newValue = value;
 
     setFormData((prevState) => ({
       ...prevState,
@@ -36,6 +36,12 @@ const FilterContent: FunctionComponent<FormContentProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormData(
+      inputs.reduce((acc, input) => {
+        acc[input.name] = input.formValue ?? "";
+        return acc;
+      }, {} as { [key in (typeof inputs)[number]["name"]]: string | number })
+    );
     onSubmit(formData);
   };
 
