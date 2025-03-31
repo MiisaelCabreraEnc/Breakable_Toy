@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 
 describe("MetricsItem Component", () => {
   const mockMetric = {
-    category: { name: "Electronics", id: "1" },
+    category: "Electronics",
     productsInStock: 50,
     stockValue: 5000,
     averagePrice: 100,
@@ -31,7 +31,7 @@ describe("MetricsItem Component", () => {
   // Test: Shows the data correctly when values are 0
   it("renders correctly when all values are zero", () => {
     const zeroMetric = {
-      category: { name: "Empty Category", id: "2" },
+      category: "Empty Category",
       productsInStock: 0,
       stockValue: 0,
       averagePrice: 0,

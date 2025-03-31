@@ -10,10 +10,16 @@ jest.mock("./hooks/useCategories");
 jest.mock("./hooks/usePagination");
 
 describe("Home Page", () => {
+  const originalConsoleError = console.error;
+
   beforeEach(() => {
+    console.error = jest.fn();
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    console.error = originalConsoleError;
+  });
   test("renders the filter form", () => {
     (useProducts as jest.Mock).mockReturnValue({
       products: [],

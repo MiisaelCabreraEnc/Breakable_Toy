@@ -5,13 +5,13 @@ import MetricsItem from "../../molecules/MetricsItem/MetricsItem"; // Importamos
 describe("Metrics Component", () => {
   const metrics = [
     {
-      category: { name: "Electronics", id: "1" },
+      category: "Electronics",
       productsInStock: 10,
       stockValue: 1000,
       averagePrice: 100,
     },
     {
-      category: { name: "Clothing", id: "2" },
+      category: "Clothing",
       productsInStock: 50,
       stockValue: 10000,
       averagePrice: 200,
@@ -19,7 +19,7 @@ describe("Metrics Component", () => {
   ];
 
   const overallMetric = {
-    category: { name: "Overall", id: "0" },
+    category: "Overall",
     productsInStock: 150,
     stockValue: 15000,
     averagePrice: 100,
@@ -74,7 +74,7 @@ describe("Metrics Component", () => {
     const newMetrics = [
       ...metrics,
       {
-        category: { name: "Toys", id: "3" },
+        category: "Toys",
         productsInStock: 2,
         stockValue: 5000,
         averagePrice: 2500,

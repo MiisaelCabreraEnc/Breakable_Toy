@@ -29,7 +29,7 @@ export function useMetrics(products: Product[], categories: Category[]) {
       const metricsData = await getMetrics();
       if (metricsData.error) throw new Error(metricsData.error);
 
-      const updatedMetrics = changeMetricsCategories(metricsData);
+      const updatedMetrics = await changeMetricsCategories(metricsData);
 
       setMetrics(updatedMetrics);
     } catch (error) {

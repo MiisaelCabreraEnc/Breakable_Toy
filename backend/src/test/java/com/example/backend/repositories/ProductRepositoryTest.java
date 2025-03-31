@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -85,14 +83,17 @@ public class ProductRepositoryTest {
       product2.setId(productRepository.save(product2).getId());
 
       // When
-      Iterable<Product> products = productRepository.getAll();
-      Iterator<Product> productsIterator = products.iterator();
+      List<Product> products = new ArrayList<>();
+      productRepository.getAll().forEach(products::add);
+
+      // Ordenar los productos por nombre para asegurar consistencia
+      products.sort(Comparator.comparing(Product::getName));
 
       // Then
-      Assertions.assertAll(
-              () -> assertEquals(product1, productsIterator.next()),
-              () -> assertEquals(product2, productsIterator.next()));
+      assertEquals(product1, products.get(0));
+      assertEquals(product2, products.get(1));
    }
+
 
    @Test
    public void deleteExistingProductTest() {
