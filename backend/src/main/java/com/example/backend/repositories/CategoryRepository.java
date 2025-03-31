@@ -5,46 +5,47 @@ import com.example.backend.models.Category;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class CategoryRepository {
 
-   private Map<Long, Category> categories = new HashMap<>();
-   private AtomicLong currentId = new AtomicLong(1);
+  private final Map<UUID, Category> categories = new HashMap<>();
 
-   public Category save(Category category) {
+  public Category save(Category category) {
 
-      Category newCategory = (Category) category.clone();
+    Category newCategory = (Category) category.clone();
 
-      newCategory.setId(currentId.getAndIncrement());
-      categories.put(newCategory.getId(), newCategory);
+    UUID id = UUID.randomUUID();
+    newCategory.setId(id);
 
-      return newCategory;
-   }
+    categories.put(newCategory.getId(), newCategory);
 
-   public Optional<Category> getById(long id) {
-      return Optional.ofNullable(categories.get(id));
-   }
+    return newCategory;
+  }
 
-   public Iterable<Category> gettAll() {
-      return categories.values();
-   }
+  public Optional<Category> getById(UUID id) {
+    return Optional.ofNullable(categories.get(id));
+  }
 
-   public boolean delete(long id) {
-      return categories.remove(id) != null;
-   }
+  public Iterable<Category> gettAll() {
+    return categories.values();
+  }
 
-   public Category update(long id, Category category) {
-      if (!categories.containsKey(id))
-         return null;
+  public boolean delete(UUID id) {
+    return categories.remove(id) != null;
+  }
 
-      category.setId(id);
-      categories.put(id, category);
+  public Category update(UUID id, Category category) {
+    if (!categories.containsKey(id))
+      return null;
 
-      return category;
+    category.setId(id);
+    categories.put(id, category);
 
-   }
+    return category;
+
+  }
 }

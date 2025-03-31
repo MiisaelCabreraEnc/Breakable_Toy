@@ -1,166 +1,87 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { InputProps } from "@/components/atoms/Input/Input";
+
+// Hooks
+import { useMemo } from "react";
+import { useFetchFormData } from "../hooks/useFetchFormData"; // Hook to get form data
+import { useProductForm } from "../hooks/useProductForm"; // Hook to handle form submission
+
+// Components
 import FormContent from "../../components/molecules/FormContent/FormContent";
+import Spinner from "../../components/atoms/Spinner/Spinner";
+import ErrorMessage from "../../components/molecules/ErrorMessage/ErrorMessage";
 
-const INPUTS: InputProps[] = [
-  {
-    as: "text" as const,
-    label: "Name",
-    name: "name",
-  },
-  {
-    as: "select" as const,
-    label: "Category",
-    name: "categoryId",
-    options: [],
-  },
-  {
-    as: "text" as const,
-    label: "New category",
-    name: "newCategory",
-  },
-  {
-    as: "text" as const,
-    label: "Stock",
-    name: "stock",
-    type: "number",
-  },
-  {
-    as: "text" as const,
-    label: "Unit Price",
-    name: "price",
-    type: "number",
-  },
-  {
-    as: "text" as const,
-    label: "Expiration Date",
-    name: "expirationDate",
-    type: "date",
-  },
-] as const;
+// Interfaces
+import { ButtonElementProps } from "../../components/atoms/Button/Button";
 
-interface CategoryData {
-  id: number;
-  name: string;
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export default function ProductForm({
+  onCancel,
+  refresh,
+  productData,
+  typeOfSubmit,
+}: any) {
+  // Determines the type of submit (create or update)
+  const currentTypeOfSubmit = typeOfSubmit ?? "create";
 
-export default function ProdctForm(props: any) {
-  const router = useRouter();
+  // Get the form data & error state
+  const { inputs, loading, error, fetchData } = useFetchFormData(productData);
 
-  const [inputs, setInputs] = useState(INPUTS);
-  const [loading, setLoading] = useState(true);
+  // Handle the form submission
+  const {
+    handleCancel,
+    handleSubmit,
+    error: submitError,
+  } = useProductForm(
+    currentTypeOfSubmit,
+    fetchData,
+    productData?.id,
+    refresh,
+    onCancel
+  );
 
-  const handleCancel = () => {
-    router.back();
-  };
-
-  async function fetchData() {
-    try {
-      const categoriesResponse = await fetch(
-        "http://localhost:9090/categories"
-      );
-      const categoriesData = await categoriesResponse.json();
-
-      const updatedInputs = inputs.map((input) => {
-        const formValue = props[input.name] ? props[input.name] : "";
-        return { ...input, formValue };
-      });
-
-      const options = [
-        {
-          children: "Create a new category",
-          value: "",
-        },
-        ...categoriesData.map((category: CategoryData) => ({
-          children: category.name,
-          value: category.id.toString(),
-        })),
-      ];
-
-      updatedInputs[1] = {
-        as: "select" as const,
-        label: "Category",
-        name: "categoryId",
-        options,
-        formValue: props.categoryId ? props.categoryId : "",
-      };
-
-      setInputs(updatedInputs);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const FORM_BUTTONS = [
-    {
-      as: "button" as const,
-      children: "Save",
-      variant: "primary" as const,
-    },
-    {
-      as: "button" as const,
-      typeof: "button" as const,
-      children: "Cancel",
-      onClick: props.handleCancel ?? handleCancel,
-      variant: "secondary" as const,
-    },
-  ];
-
-  async function handleSubmit(formData: any) {
-    console.log(formData);
-    try {
-      if (formData.categoryId === "") {
-        const categoryResponse = await fetch(
-          "http://localhost:9090/categories",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name: formData.newCategory }),
-          }
-        );
-        const newCategory = await categoryResponse.json();
-        formData.categoryId = newCategory.id;
-      }
-
-      const response = await fetch("http://localhost:9090/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (props.refresh) {
-        props.refresh();
-        props.handleCancel();
-        fetchData();
-      } else {
-        router.push("/");
-        router.refresh();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // UseMemo to avoid unnecessary re-renders
+  const FORM_BUTTONS: ButtonElementProps[] = useMemo(
+    () => [
+      {
+        as: "button",
+        typeof: "submit",
+        children: loading ? "Saving..." : "Save",
+        variant: "primary",
+        disabled: loading, // Disable button while processing
+      },
+      {
+        as: "button",
+        typeof: "button",
+        children: "Cancel",
+        onClick: handleCancel,
+        variant: "secondary",
+        disabled: loading, // Prevent cancel while loading
+      },
+    ],
+    [handleCancel, loading]
+  );
 
   return (
-    <main className="flex items center flex-col m-auto">
-      {!loading && (
+    <main className="flex items-center flex-col m-auto">
+      {/* Show error message if fetching data fails */}
+      {error && <ErrorMessage onClick={fetchData}>{error}</ErrorMessage>}
+
+      {/* Show loading state while fetching */}
+      {loading && (
+        <Spinner className="border-8 m-auto mt-32 border-gray-600 text-gray-600 h-32 w-32" />
+      )}
+
+      {/* Show the form if there are no errors */}
+      {!loading && !error && (
         <FormContent
           inputs={inputs}
           buttons={FORM_BUTTONS}
-          onSubmit={props.handleSubmit ?? handleSubmit}
+          onSubmit={handleSubmit}
         />
       )}
+
+      {/* Show error message if form submission fails */}
+      {submitError && <ErrorMessage>{submitError}</ErrorMessage>}
     </main>
   );
 }

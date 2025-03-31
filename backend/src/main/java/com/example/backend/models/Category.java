@@ -1,15 +1,18 @@
 package com.example.backend.models;
 
+import java.util.Objects;
+import java.util.UUID;
+
 public class Category implements Cloneable {
 
-   private long id;
+   private UUID id;
    private String name;
 
-   public long getId() {
+   public UUID getId() {
       return id;
    }
 
-   public void setId(long id) {
+   public void setId(UUID id) {
       this.id = id;
    }
 
@@ -22,12 +25,15 @@ public class Category implements Cloneable {
    }
 
    @Override
+   public boolean equals(Object o) {
+      if (o == null || getClass() != o.getClass()) return false;
+      Category category = (Category) o;
+      return Objects.equals(id, category.id) && Objects.equals(name, category.name);
+   }
+
+   @Override
    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (int) (id ^ (id >>> 32));
-      result = prime * result + ((name == null) ? 0 : name.hashCode());
-      return result;
+      return Objects.hash(id, name);
    }
 
    @Override
@@ -43,25 +49,6 @@ public class Category implements Cloneable {
    @Override
    public String toString() {
       return "Category [id=" + id + ", name=" + name + "]";
-   }
-
-   @Override
-   public boolean equals(Object obj) {
-      if (this == obj)
-         return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      Category other = (Category) obj;
-      if (id != other.id)
-         return false;
-      if (name == null) {
-         if (other.name != null)
-            return false;
-      } else if (!name.equals(other.name))
-         return false;
-      return true;
    }
 
 }

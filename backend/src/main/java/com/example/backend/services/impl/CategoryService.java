@@ -5,12 +5,13 @@ import com.example.backend.repositories.CategoryRepository;
 import com.example.backend.services.ICategoryService;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 @Service
 public class CategoryService implements ICategoryService {
-   private CategoryRepository categoryRepository;
+   private final CategoryRepository categoryRepository;
 
    public CategoryService(CategoryRepository categoryRepository) {
       this.categoryRepository = categoryRepository;
@@ -30,7 +31,7 @@ public class CategoryService implements ICategoryService {
    }
 
    @Override
-   public Optional<Category> getCategoryById(long id) {
+   public Optional<Category> getCategoryById(UUID id) {
       return categoryRepository.getById(id);
    }
 
@@ -40,12 +41,12 @@ public class CategoryService implements ICategoryService {
    }
 
    @Override
-   public boolean deleteCategory(long id) {
+   public boolean deleteCategory(UUID id) {
       return categoryRepository.delete(id);
    }
 
    @Override
-   public Category updateCategory(long id, Category category) {
+   public Category updateCategory(UUID id, Category category) {
 
       try {
          if (category.getName().isEmpty())

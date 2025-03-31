@@ -1,62 +1,62 @@
 package com.example.backend.services.impl;
 
+import com.example.backend.models.Metric;
 import com.example.backend.models.Product;
 import com.example.backend.repositories.ProductRepository;
 import com.example.backend.services.IProductService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProductService implements IProductService {
-  private ProductRepository productRepository;
+  private final ProductRepository productRepository;
 
   public ProductService(ProductRepository productRepository) {
-
     this.productRepository = productRepository;
   }
 
   public Product createProduct(Product product) {
-    // UUID.randomUUID().toString();
     try {
-
       if (product.getName() == null)
         throw new IllegalArgumentException("Name cannot be empty");
 
-      if (product.getName().length() > 120 && product.getName().length() < 1)
+      if (product.getName().length() > 120 || product.getName().isEmpty())
         throw new IllegalArgumentException("Name must have between 1 and 120 characters");
 
       if (product.getPrice() == null)
         throw new IllegalArgumentException("Price cannot be empty");
 
-      if (product.getPrice().compareTo(BigDecimal.ZERO) == -1)
+      if (product.getPrice().compareTo(BigDecimal.ZERO) < 0)
         throw new IllegalArgumentException("Price must be greater or equal to 0");
 
       if (product.getStock() < 0)
         throw new IllegalArgumentException("Stock must be greater or equal to 0");
-      if (product.getExpirationDate() == null)
-        product.setExpirationDate(LocalDate.of(0, 0, 0));
 
       return productRepository.save(product);
-
     } catch (Exception e) {
       return null;
     }
   }
 
-  public Optional<Product> getProductById(long id) {
+  public int getTotalProducts() {
+    List<Product> products = new ArrayList<>();
+    productRepository.getAll().forEach(products::add);
+    return products.size();
+  }
 
+  // Cambiar long por UUID
+  public Optional<Product> getProductById(UUID id) {
     return productRepository.getById(id);
   }
 
-  public PaginatedResult getAllProducts(Long category, String orderedBy, Boolean availability, int page, String name) {
+  // Cambiar long por UUID en delete y update
+  public Iterable<Product> getAllProducts(UUID category, String orderedBy, Boolean availability, int page,
+      String name) {
     List<Product> products = new ArrayList<>();
     productRepository.getAll().forEach(products::add);
 
@@ -78,84 +78,119 @@ public class ProductService implements IProductService {
           .collect(Collectors.toList());
     }
 
-    if ("price".equalsIgnoreCase(orderedBy)) {
-      products.sort(Comparator.comparing(Product::getPrice, Comparator.naturalOrder()));
-    } else if ("name".equalsIgnoreCase(orderedBy)) {
-      products.sort(Comparator.comparing(Product::getName));
-    } else if ("expirationDate".equalsIgnoreCase(orderedBy)) {
-      products.sort(Comparator.comparing(Product::getExpirationDate));
-    } else if ("category".equalsIgnoreCase(orderedBy)) {
-      products.sort(Comparator.comparingLong(Product::getCategoryId));
-    } else if ("stock".equalsIgnoreCase(orderedBy)) {
-      products.sort(Comparator.comparingInt(Product::getStock));
-    }
+    if (orderedBy != null)
+      switch (orderedBy.toLowerCase()) {
+        case "price":
+          products.sort(Comparator.comparing(Product::getPrice, Comparator.nullsLast(Comparator.naturalOrder())));
+          break;
+        case "name":
+          products.sort(Comparator.comparing(Product::getName, Comparator.nullsLast(Comparator.naturalOrder())));
+          break;
+        case "expirationdate":
+          products
+              .sort(Comparator.comparing(Product::getExpirationDate, Comparator.nullsLast(Comparator.naturalOrder())));
+          break;
+        case "category":
+          products.sort(Comparator.comparing(Product::getCategoryId, Comparator.nullsLast(Comparator.naturalOrder())));
+          break;
+        case "stock":
+          products.sort(Comparator.comparingInt(Product::getStock));
+          break;
+      }
+
+    if (page > 0)
+      page--;
 
     int pageSize = 10;
     int start = page * pageSize;
     int end = Math.min(start + pageSize, products.size());
 
-    List<Product> paginatedProducts = products.subList(start, end);
-
-    return new PaginatedResult(paginatedProducts, products.size());
+    return products.subList(start, end);
   }
 
-  public boolean deleteProduct(long id) {
+  // Cambiar long por UUID en el delete
+  public boolean deleteProduct(UUID id) {
     return productRepository.delete(id);
   }
 
-  public Product updateProduct(long id, Product product) {
-
+  // Cambiar long por UUID en el update
+  public Product updateProduct(UUID id, Product product) {
     try {
-
       if (product.getName() == null)
         throw new NullPointerException("Name cannot be empty");
 
-      if (product.getName().length() > 120 && product.getName().length() < 1)
+      if (product.getName().length() > 120 || product.getName().isEmpty())
         throw new IllegalArgumentException("Name must have between 1 and 120 characters");
 
       if (product.getPrice() == null)
         throw new NullPointerException("Price cannot be empty");
 
-      if (product.getPrice().compareTo(BigDecimal.ZERO) == -1)
+      if (product.getPrice().compareTo(BigDecimal.ZERO) < 0)
         throw new IllegalArgumentException("Price must be greater or equal to 0");
 
       if (product.getStock() < 0)
         throw new IllegalArgumentException("Stock must be greater or equal to 0");
 
       return productRepository.update(id, product);
-
     } catch (Exception e) {
       return null;
     }
   }
 
-  public synchronized Product updateProductStock(long id, int stock) {
+  // Cambiar long por UUID en el updateStock
+  public synchronized Product updateProductStock(UUID id, int stock) {
     Optional<Product> product = productRepository.getById(id);
 
-    if (!product.isPresent())
+    if (product.isEmpty())
       return null;
 
     product.get().setStock(stock);
     return productRepository.update(id, product.get());
-
   }
 
-  public static class PaginatedResult {
-    private final List<Product> products;
-    private final int totalProducts;
+  public Iterable<Metric> getMetrics() {
+    List<Product> products = new ArrayList<>();
+    productRepository.getAll().forEach(products::add);
 
-    public PaginatedResult(List<Product> products, int totalProducts) {
-      this.products = products;
-      this.totalProducts = totalProducts;
+    // Agrupar los productos por categoría
+    Map<UUID, List<Product>> productsByCategory = products.stream()
+        .collect(Collectors.groupingBy(Product::getCategoryId));
+
+    List<Metric> metrics = new ArrayList<>();
+
+    for (Map.Entry<UUID, List<Product>> entry : productsByCategory.entrySet()) {
+      UUID categoryId = entry.getKey();
+      List<Product> categoryProducts = entry.getValue();
+
+      // Buscar la categoría directamente en la lista de categorías
+
+      // Calcular los valores requeridos
+      int productsInStock = categoryProducts.stream()
+          .mapToInt(Product::getStock)
+          .sum();
+
+      BigDecimal stockValue = categoryProducts.stream()
+          .map(product -> product.getPrice().multiply(BigDecimal.valueOf(product.getStock())))
+          .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+      BigDecimal averagePrice = BigDecimal.ZERO;
+      if (productsInStock > 0) {
+        averagePrice = stockValue.divide(BigDecimal.valueOf(productsInStock), 2, RoundingMode.HALF_UP);
+      }
+
+      // Crear el DTO de las métricas
+      Metric categoryMetrics = new Metric(
+          categoryId,
+          productsInStock,
+          stockValue,
+          averagePrice);
+
+      // Añadir a la lista de métricas
+      metrics.add(categoryMetrics);
+
     }
 
-    public List<Product> getProducts() {
-      return products;
-    }
-
-    public int getTotalProducts() {
-      return totalProducts;
-    }
+    return metrics;
   }
 
 }

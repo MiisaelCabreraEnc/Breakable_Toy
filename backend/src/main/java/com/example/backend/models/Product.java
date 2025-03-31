@@ -3,75 +3,48 @@ package com.example.backend.models;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
 
 public class Product implements Cloneable {
-   private long id;
+   private UUID id; // Cambiado a UUID
    private String name;
    private BigDecimal price;
-   private long categoryId;
+   private UUID categoryId;
    private LocalDate expirationDate;
    private LocalDateTime creationDate;
    private LocalDateTime updateDate;
-
    private int stock;
 
    @Override
    public String toString() {
       return "Product [id=" + id + ", name=" + name + ", price=" + price + ", categoryId=" + categoryId
-            + ", expirationDate=" + expirationDate + ", stock=" + stock + "]";
+              + ", expirationDate=" + expirationDate + ", stock=" + stock + "]";
    }
 
-   public long getId() {
+   public UUID getId() {
       return id;
    }
 
    @Override
    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (int) (id ^ (id >>> 32));
-      result = prime * result + ((name == null) ? 0 : name.hashCode());
-      result = prime * result + ((price == null) ? 0 : price.hashCode());
-      result = prime * result + (int) (categoryId ^ (categoryId >>> 32));
-      result = prime * result + ((expirationDate == null) ? 0 : expirationDate.hashCode());
-      result = prime * result + stock;
-      return result;
+      return Objects.hash(id, name, price, categoryId, expirationDate, stock);
    }
 
    @Override
    public boolean equals(Object obj) {
-      if (this == obj)
-         return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
+      if (this == obj) return true;
+      if (obj == null || getClass() != obj.getClass()) return false;
       Product other = (Product) obj;
-      if (id != other.id)
-         return false;
-      if (name == null) {
-         if (other.name != null)
-            return false;
-      } else if (!name.equals(other.name))
-         return false;
-      if (price == null) {
-         if (other.price != null)
-            return false;
-      } else if (!price.equals(other.price))
-         return false;
-      if (categoryId != other.categoryId)
-         return false;
-      if (expirationDate == null) {
-         if (other.expirationDate != null)
-            return false;
-      } else if (!expirationDate.equals(other.expirationDate))
-         return false;
-      if (stock != other.stock)
-         return false;
-      return true;
+      return Objects.equals(id, other.id) &&
+              Objects.equals(name, other.name) &&
+              Objects.equals(price, other.price) &&
+              categoryId == other.categoryId &&
+              Objects.equals(expirationDate, other.expirationDate) &&
+              stock == other.stock;
    }
 
-   public void setId(long id) {
+   public void setId(UUID id) { // Cambiado a UUID
       this.id = id;
    }
 
@@ -113,11 +86,11 @@ public class Product implements Cloneable {
       return stock;
    }
 
-   public long getCategoryId() {
+   public UUID getCategoryId() {
       return categoryId;
    }
 
-   public void setCategoryId(long categoryId) {
+   public void setCategoryId(UUID categoryId) {
       this.categoryId = categoryId;
    }
 
@@ -140,5 +113,4 @@ public class Product implements Cloneable {
    public void setStock(int stock) {
       this.stock = stock;
    }
-
 }

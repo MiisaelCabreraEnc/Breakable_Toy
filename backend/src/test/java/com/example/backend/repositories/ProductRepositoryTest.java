@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class ProductRepositoryTest {
 
       // Then:
       Assertions.assertNotNull(savedProduct);
-      Assertions.assertTrue(savedProduct.getId() > 0);
+      Assertions.assertNotNull(savedProduct.getId());
    }
 
    @Test
@@ -37,7 +38,7 @@ public class ProductRepositoryTest {
       product.setName("Mesa");
       product.setExpirationDate(LocalDate.now().plusDays(5));
       product.setPrice(new BigDecimal("5.01"));
-      product.setCategoryId(1);
+      product.setCategoryId(UUID.randomUUID());
       product.setStock(10);
       Product savedProduct = productRepository.save(product);
 
@@ -55,10 +56,10 @@ public class ProductRepositoryTest {
       ProductRepository productRepository = new ProductRepository();
 
       // When
-      Optional<Product> foundProduct = productRepository.getById(1);
+      Optional<Product> foundProduct = productRepository.getById(UUID.randomUUID());
 
       // Then
-      Assertions.assertTrue(!foundProduct.isPresent());
+      Assertions.assertTrue(foundProduct.isEmpty());
    }
 
    @Test
@@ -71,13 +72,13 @@ public class ProductRepositoryTest {
       product1.setName("Mesa");
       product1.setExpirationDate(LocalDate.now().plusDays(5));
       product1.setPrice(new BigDecimal("5.01"));
-      product1.setCategoryId(1);
+      product1.setCategoryId(UUID.randomUUID());
       product1.setStock(10);
 
       product2.setName("Mesa2");
       product2.setExpirationDate(LocalDate.now().plusDays(6));
       product2.setPrice(new BigDecimal("6.59"));
-      product2.setCategoryId(1);
+      product2.setCategoryId(UUID.randomUUID());
       product2.setStock(5);
 
       product1.setId(productRepository.save(product1).getId());
@@ -89,9 +90,8 @@ public class ProductRepositoryTest {
 
       // Then
       Assertions.assertAll(
-            () -> assertEquals(product1, productsIterator.next()),
-            () -> assertEquals(product2, productsIterator.next()));
-
+              () -> assertEquals(product1, productsIterator.next()),
+              () -> assertEquals(product2, productsIterator.next()));
    }
 
    @Test
@@ -102,7 +102,7 @@ public class ProductRepositoryTest {
       product.setName("Mesa");
       product.setExpirationDate(LocalDate.now().plusDays(5));
       product.setPrice(new BigDecimal("5.01"));
-      product.setCategoryId(1);
+      product.setCategoryId(UUID.randomUUID());
       product.setStock(10);
       Product newProduct = productRepository.save(product);
 
@@ -111,14 +111,14 @@ public class ProductRepositoryTest {
       Optional<Product> deletedProduct = productRepository.getById(newProduct.getId());
 
       // Then
-      Assertions.assertTrue(!deletedProduct.isPresent());
+      Assertions.assertTrue(deletedProduct.isEmpty());
    }
 
    @Test
    public void deleteNonExistingProductTest() {
       // Given
       ProductRepository productRepository = new ProductRepository();
-      long productId = 1;
+      UUID productId = UUID.randomUUID();
 
       // When
       boolean isDeleted = productRepository.delete(productId);
@@ -135,7 +135,7 @@ public class ProductRepositoryTest {
       product.setName("Mesa");
       product.setExpirationDate(LocalDate.now().plusDays(5));
       product.setPrice(new BigDecimal("5.01"));
-      product.setCategoryId(1);
+      product.setCategoryId(UUID.randomUUID());
       product.setStock(10);
 
       Product createdProduct = productRepository.save(product);
@@ -145,23 +145,21 @@ public class ProductRepositoryTest {
       newProduct.setName("Mesa2");
       newProduct.setExpirationDate(LocalDate.now().plusDays(6));
       newProduct.setPrice(new BigDecimal("6.59"));
-      newProduct.setCategoryId(2);
+      newProduct.setCategoryId(UUID.randomUUID());
       newProduct.setStock(5);
 
       Product updatedProduct = productRepository.update(createdProduct.getId(), newProduct);
 
       // Then
       Assertions.assertAll(
-            () -> assertEquals(updatedProduct.getId(), createdProduct.getId()),
-            () -> assertNotEquals(updatedProduct.getName(), createdProduct.getName()),
-            () -> assertNotEquals(updatedProduct.getExpirationDate(), createdProduct.getExpirationDate()),
-            () -> assertNotEquals(updatedProduct.getPrice(), createdProduct.getPrice()),
-            () -> assertNotEquals(updatedProduct.getCategoryId(), createdProduct.getCategoryId()),
-            () -> assertNotEquals(updatedProduct.getStock(), createdProduct.getStock()),
-            () -> assertNotEquals(updatedProduct.getUpdateDate(), createdProduct.getUpdateDate()),
-            () -> assertEquals(updatedProduct.getCreationDate(), createdProduct.getCreationDate())
-
+              () -> assertEquals(updatedProduct.getId(), createdProduct.getId()),
+              () -> assertNotEquals(updatedProduct.getName(), createdProduct.getName()),
+              () -> assertNotEquals(updatedProduct.getExpirationDate(), createdProduct.getExpirationDate()),
+              () -> assertNotEquals(updatedProduct.getPrice(), createdProduct.getPrice()),
+              () -> assertNotEquals(updatedProduct.getCategoryId(), createdProduct.getCategoryId()),
+              () -> assertNotEquals(updatedProduct.getStock(), createdProduct.getStock()),
+              () -> assertNotEquals(updatedProduct.getUpdateDate(), createdProduct.getUpdateDate()),
+              () -> assertEquals(updatedProduct.getCreationDate(), createdProduct.getCreationDate())
       );
    }
-
 }

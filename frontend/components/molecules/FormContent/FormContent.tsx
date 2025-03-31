@@ -1,71 +1,95 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useState } from "react";
 import Input, { InputProps } from "../../atoms/Input/Input";
 import Button, { ButtonElementProps } from "../../atoms/Button/Button";
 
+/**
+ * Defines the props for the FormContent component.
+ */
 interface FormContentProps {
-  inputs: InputProps[];
-  buttons: ButtonElementProps[];
-  onSubmit: (formData: any) => void;
+  inputs: InputProps[]; // List of input fields to render
+  buttons: ButtonElementProps[]; // List of buttons for form actions
+  onSubmit: (formData: Record<string, string | number>) => void; // Submission handler
+  hasBorder?: boolean; // Optional prop to add border
 }
 
-const FilterContent: FunctionComponent<FormContentProps> = ({
+/**
+ * A dynamic form component that generates inputs and buttons from props.
+ *
+ * - Uses `useState` to manage form state.
+ * - Handles form submission and resets values.
+ * - Supports both text inputs and dropdowns.
+ */
+const FormContent: FunctionComponent<FormContentProps> = ({
   inputs,
   buttons,
+  hasBorder,
   onSubmit,
 }) => {
-  const [formData, setFormData] = useState<{
-    [key in (typeof inputs)[number]["name"]]: string | number;
-  }>(
-    inputs.reduce((acc, input) => {
-      acc[input.name] = input.formValue ?? "";
-      return acc;
-    }, {} as { [key in (typeof inputs)[number]["name"]]: string | number })
+  /**
+   * Initializes form state with input names as keys.
+   * Defaults to `formValue` if available, otherwise an empty string.
+   */
+  const [formData, setFormData] = useState(
+    inputs.reduce(
+      (acc, input) => ({
+        ...acc,
+        [input.name]: input.formValue ?? "",
+      }),
+      {} as Record<string, string | number>
+    )
   );
 
+  /**
+   * Handles input value changes and updates state accordingly.
+   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    const newValue = value;
 
     setFormData((prevState) => ({
       ...prevState,
-      [name]: newValue,
+      [name]: value,
     }));
   };
 
+  /**
+   * Handles form submission:
+   * - Prevents default behavior.
+   * - Calls `onSubmit` with the current form data.
+   * - Resets form values after submission.
+   */
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormData(
-      inputs.reduce((acc, input) => {
-        acc[input.name] = input.formValue ?? "";
-        return acc;
-      }, {} as { [key in (typeof inputs)[number]["name"]]: string | number })
-    );
     onSubmit(formData);
   };
 
   return (
-    <form className="border w-full m-auto p-8" onSubmit={handleFormSubmit}>
-      <div className=" flex flex-col ">
-        <div className=" w-2/3 m-auto">
+    <form
+      className={` w-full m-auto p-8 ${hasBorder ? "border" : ""}`}
+      onSubmit={handleFormSubmit}
+      aria-label="form-content"
+    >
+      <div className="flex flex-col">
+        {/* Render input fields */}
+        <div className="w-2/3 m-auto">
           {inputs.map((input, index) => (
             <Input
-              disabled={
-                formData["categoryId"] !== "" && input.name == "newCategory"
-                  ? true
-                  : false
-              }
-              key={input.name + index}
+              key={`${input.name}_${index}`}
               value={formData[input.name]}
               onChange={handleChange}
+              disabled={
+                formData["categoryId"] !== "" && input.name === "newCategory"
+              }
               {...input}
             />
           ))}
         </div>
+
+        {/* Render form action buttons */}
         <div className="flex justify-evenly m-auto w-1/2">
           {buttons.map((button, index) => (
-            <Button key={button.as + "_" + index} {...button} />
+            <Button key={`${button.as}_${index}`} {...button} />
           ))}
         </div>
       </div>
@@ -73,4 +97,4 @@ const FilterContent: FunctionComponent<FormContentProps> = ({
   );
 };
 
-export default FilterContent;
+export default FormContent;

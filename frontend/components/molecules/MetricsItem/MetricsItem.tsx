@@ -1,15 +1,9 @@
 import { FunctionComponent } from "react";
-
-export interface MetricsItemProps {
-  category: string;
-  productsInStock: number;
-  stockValue: number;
-  averagePrice: number;
-}
+import MetricInterface from "../../../interfaces/MetricInterface";
 
 const TD_STYLE = "text-center py-4";
 
-const MetricsItem: FunctionComponent<MetricsItemProps> = ({
+const MetricsItem: FunctionComponent<MetricInterface> = ({
   category,
   productsInStock,
   stockValue,

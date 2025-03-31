@@ -1,6 +1,7 @@
 package com.example.backend.services;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.example.backend.models.Category;
 
@@ -8,12 +9,12 @@ public interface ICategoryService {
 
    Category saveCategory(Category category);
 
-   Optional<Category> getCategoryById(long id);
+   Optional<Category> getCategoryById(UUID id);
 
    Iterable<Category> getAllCategories();
 
-   boolean deleteCategory(long id);
+   boolean deleteCategory(UUID id);
 
-   Category updateCategory(long id, Category category);
+   Category updateCategory(UUID id, Category category);
 
 }

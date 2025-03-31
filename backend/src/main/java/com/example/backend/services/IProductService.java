@@ -1,20 +1,25 @@
 package com.example.backend.services;
 
 import java.util.Optional;
+import java.util.UUID;
 
+import com.example.backend.models.Metric;
 import com.example.backend.models.Product;
-import com.example.backend.services.impl.ProductService.PaginatedResult;
 
 public interface IProductService {
    Product createProduct(Product product);
 
-   Optional<Product> getProductById(long id);
+   int getTotalProducts();
 
-   PaginatedResult getAllProducts(Long category, String orderedBy, Boolean availability, int page, String name);
+   Optional<Product> getProductById(UUID id);
 
-   boolean deleteProduct(long id);
+   Iterable<Product> getAllProducts(UUID category, String orderedBy, Boolean availability, int page, String name);
 
-   Product updateProduct(long id, Product product);
+   boolean deleteProduct(UUID id);
 
-   Product updateProductStock(long id, int stock);
+   Product updateProduct(UUID id, Product product);
+
+   Product updateProductStock(UUID id, int stock);
+
+   Iterable<Metric> getMetrics();
 }

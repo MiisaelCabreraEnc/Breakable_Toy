@@ -1,41 +1,52 @@
 import { FunctionComponent } from "react";
 import PaginationElement, {
-  paginationElementProps,
+  PaginationElementProps,
 } from "../../atoms/PaginationElement/PaginationElement";
 
+/**
+ * Props for the Pagination component.
+ */
 interface PaginationProps {
-  totalPages: number;
-  maxPages: number;
-  currentPage: number;
-  route: string;
+  totalPages: number; // Total number of pages available
+  maxPages: number; // Maximum number of pages to show in pagination
+  currentPage: number; // The current active page
+  route: string; // The URL route for page navigation
 }
 
+/**
+ * Pagination component to handle page navigation with dynamic page elements.
+ *
+ * - Generates pagination elements based on the current page and `maxPages`.
+ * - Adds "previous" and "next" navigation buttons.
+ * - Dynamically adds ellipsis (`...`) and next/previous tens for long page ranges.
+ */
 const Pagination: FunctionComponent<PaginationProps> = ({
   totalPages,
   maxPages,
   currentPage,
   route,
 }) => {
+  // Ensure maxPages doesn't exceed totalPages
   if (maxPages > totalPages) maxPages = totalPages;
 
-  const elements: paginationElementProps[] = [
+  const elements: PaginationElementProps[] = [
     {
-      href: route + "1",
+      href: route + "1", // First page button
       children: "<<",
       variant: "default",
     },
     {
-      href: route + (currentPage - 1),
+      href: route + (currentPage - 1), // Previous page button
       children: "<",
       variant: currentPage === 1 ? "disabled" : "default",
     },
     {
-      href: route + (currentPage + 1),
+      href: route + (currentPage + 1), // Next page button
       children: ">",
       variant: currentPage === totalPages ? "disabled" : "default",
     },
     {
-      href: route + totalPages,
+      href: route + totalPages, // Last page button
       children: ">>",
       variant: "default",
     },
@@ -43,6 +54,7 @@ const Pagination: FunctionComponent<PaginationProps> = ({
 
   const halfOfMaxElements = Math.ceil(maxPages / 2);
 
+  // Function to add the next tens page to pagination
   const seedNextTenth = () => {
     const nextTenth = Math.ceil((currentPage + halfOfMaxElements) / 10) * 10;
 
@@ -51,7 +63,7 @@ const Pagination: FunctionComponent<PaginationProps> = ({
       0,
       {
         href: "",
-        children: "...",
+        children: "...", // Ellipsis to indicate skipped pages
         variant: "disabled",
       },
       {
@@ -62,6 +74,7 @@ const Pagination: FunctionComponent<PaginationProps> = ({
     );
   };
 
+  // Function to add the previous tens page to pagination
   const seedPreviousTenth = () => {
     let previousTenth = 1;
 
@@ -83,12 +96,13 @@ const Pagination: FunctionComponent<PaginationProps> = ({
       },
       {
         href: "",
-        children: "...",
+        children: "...", // Ellipsis to indicate skipped pages
         variant: "disabled",
       }
     );
   };
 
+  // Function to add a page number to the pagination elements
   const seedPage = (position: number) => {
     elements.splice(elements.length - 2, 0, {
       href: route + position,
@@ -97,25 +111,26 @@ const Pagination: FunctionComponent<PaginationProps> = ({
     });
   };
 
+  // Generate pagination based on the current page and maxPages
   if (currentPage < halfOfMaxElements + halfOfMaxElements / 2) {
     for (let i = 1; i <= maxPages; i++) {
-      seedPage(i);
+      seedPage(i); // Generate pages at the start
     }
-    if (totalPages > maxPages) seedNextTenth();
+    if (totalPages > maxPages) seedNextTenth(); // Add next tens if needed
   } else if (currentPage < totalPages - halfOfMaxElements) {
-    if (totalPages > maxPages) seedPreviousTenth();
+    if (totalPages > maxPages) seedPreviousTenth(); // Add previous tens if needed
     for (
       let i = currentPage - Math.trunc(maxPages / 2);
       i < currentPage + maxPages / 2;
       i++
     ) {
-      seedPage(i);
+      seedPage(i); // Generate pages around the current page
     }
-    if (totalPages > maxPages) seedNextTenth();
+    if (totalPages > maxPages) seedNextTenth(); // Add next tens if needed
   } else {
-    if (totalPages > maxPages) seedPreviousTenth();
+    if (totalPages > maxPages) seedPreviousTenth(); // Add previous tens if needed
     for (let i = totalPages - maxPages + 1; i <= totalPages; i++) {
-      seedPage(i);
+      seedPage(i); // Generate pages at the end
     }
   }
 
